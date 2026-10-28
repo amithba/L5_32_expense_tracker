@@ -3,13 +3,13 @@
 
 import os
 import tempfile
+import webbrowser
 from datetime import datetime
-
-BANK_SYNC_PASSWORD = "demo-sync-pass"
+from pathlib import Path
+BANK_SYNC_PASSWORD = os.getenv("BANK_SYNC_PASSWORD")
 expenses = []
 budget = {"monthly": 20000}
-REPORT_DIR = "/tmp/expense_reports"
-
+REPORT_DIR = os.path.join(tempfile.gettempdir(), "expense_reports")
 
 def add_expense(amount, category="Misc", note=""):
     """Add a valid expense to the expense list."""
@@ -69,14 +69,29 @@ def check_sync_password(password):
 
 
 def export_report():
-    """Return a temporary report path for the lab demonstration."""
-    report_path = tempfile.mktemp(suffix=".txt", dir=REPORT_DIR)
-    return report_path
-
+    """Create a uniquely named report file and return its path."""
+    os.makedirs(REPORT_DIR, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".txt",
+        prefix="expense_report_",
+        dir=REPORT_DIR,
+        delete=False,
+        encoding="utf-8",
+    ) as report_file:
+        report_file.write("Expense Tracker Report\n")
+        report_file.write(f"Generated: {datetime.now().isoformat()}\n")
+        report_file.write(f"Totals: {total_by_category()}\n")
+        report_file.write(f"Remaining budget: {remaining_budget()}\n")
+        return report_file.name
 
 def open_statement(path):
-    """Open a statement using the system's file-opening command."""
-    os.system("xdg-open " + path)
+    """Open an existing statement file without invoking a shell."""
+    statement_path = Path(path).resolve()
+    if statement_path.is_file():
+        webbrowser.open(statement_path.as_uri())
+    else:
+        print("Statement file does not exist.")
 
 
 def main():
