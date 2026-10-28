@@ -6,10 +6,12 @@ import tempfile
 import webbrowser
 from datetime import datetime
 from pathlib import Path
+
 BANK_SYNC_PASSWORD = os.getenv("BANK_SYNC_PASSWORD")
 expenses = []
 budget = {"monthly": 20000}
 REPORT_DIR = os.path.join(tempfile.gettempdir(), "expense_reports")
+
 
 def add_expense(amount, category="Misc", note=""):
     """Add a valid expense to the expense list."""
@@ -84,6 +86,7 @@ def export_report():
         report_file.write(f"Totals: {total_by_category()}\n")
         report_file.write(f"Remaining budget: {remaining_budget()}\n")
         return report_file.name
+
 
 def open_statement(path):
     """Open an existing statement file without invoking a shell."""
